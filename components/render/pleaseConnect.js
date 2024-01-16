@@ -1,13 +1,31 @@
 import { default as React, useState, useRef, useEffect } from 'react';
 import { useAccount } from 'wagmi'
+import { getAccount } from '@wagmi/core';
+
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 
 
 const PleaseConnect = (props) => {
-    const { address, isConnecting, isDisconnected } = useAccount()
+    const [userAddress, setUserAddress] = React.useState("");
+    const [isConnected, setIsConnected] = React.useState(true);
 
-    if (isConnecting) return <div className=''>Connecting…</div>
-    if (isDisconnected) return (
+    useEffect(() => {
+        async function load() {
+          console.log("Loading")
+          try {
+            const account = await getAccount();
+            console.log(account)
+            setIsConnected(account.isConnected);
+          } catch (error) {
+            console.error("There is an error loading the app", error);
+          }
+    
+        }
+        load();
+      }, []);
+    
+    
+    if (!isConnected) return (
         <div className="h-full w-full flex items-center justify-center">
             <div className="text-center">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="mx-auto h-12 w-12 text-gray-400">
@@ -20,6 +38,7 @@ const PleaseConnect = (props) => {
                 </div>
             </div>
         </div>);
+        
     return <div>{props.children}</div>;
 }
 

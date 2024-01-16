@@ -1,6 +1,6 @@
 import Head from 'next/head'
 
-import { default as React, useState, useEffect } from 'react';
+import { default as React, useState, useEffect, Suspense } from 'react';
 
 import { getAccount } from '@wagmi/core';
 import { useAccount } from 'wagmi';
@@ -327,7 +327,6 @@ const Page = (props) => {
                     <h3 class="mt-0 text-white absolute left-[5px] top-2 text-center z-13 pr-[1px] pl-[2px] flex m-0 items-center leading-none text-[0.833rem]">Balance</h3>
                     <p class="my-4 text-left">DOS <TokenBalance address={userAddress} token={tokenAddress} /></p>
                     <hr class="wp-block-separator has-alpha-channel-opacity" />
-                    {userAddress}
                     <p class="my-4 text-left">sDOS <TokenBalance address={userAddress} token={stakingAddress} /></p>
                     <p class="my-4 text-left">Approximate staking APR 22.4562%</p>
                     <ContractWrite address={stakingAddress} abi={[
