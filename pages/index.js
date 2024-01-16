@@ -1,9 +1,12 @@
 import Head from 'next/head'
 
+import { default as React, useState, useEffect } from 'react';
+
+import { getAccount } from '@wagmi/core';
+import { useAccount } from 'wagmi';
 
 import Footer from '@/components/Footer'
 import Header from '@/components/Header'
-
 
 import Moment from 'react-moment';
 import toast from 'react-hot-toast';
@@ -25,14 +28,45 @@ import WatchEvents from 'components/render/watchEvents';
 import Uniswap from 'components/render/uniswap';
 import APICall from 'components/render/apiCall';
 
+import PleaseConnect from 'components/render/pleaseConnect';
+
 import ERC20ABI from 'ABIS/ERC20.json';
+import STAKINGABI from 'ABIS/Staking.json';
 
 
-export default function Home() {
+const Page = (props) => {
+
+  const tokenAddress = "0x90b8ff52b4dc225acf5c9a2409f92d1e062f39f3";
+  const stakingAddress = "0xc3d63a26598154bbd7cc9b6974f20a615ec2056f";
+
+  const [userAddress, setUserAddress] = React.useState("");
+  const [connectedChain, setConnectedChain] = React.useState("");
+
+  useEffect(() => {
+    async function load() {
+      console.log("Loading")
+      try {
+        const account = await getAccount();
+        setUserAddress(account.address);
+        setConnectedChain(chain != null ? chain : {
+          id: 1,
+          name: "Ethereum",
+          shortName: "ETH",
+          chain: "ETH"
+        });
+      } catch (error) {
+        console.error("There is an error loading the app", error);
+      }
+
+    }
+    load();
+  }, []);
+
   return (
     <>
       <Head>
         <script src="https://cdn.tailwindcss.com"></script>
+        <link href="https://cdn.jsdelivr.net/npm/daisyui@3.1.1/dist/full.css" rel="stylesheet" type="text/css" />
       </Head>
       <Header />
 
@@ -237,22 +271,39 @@ export default function Home() {
                 <div class="mt-4 bg-[#d6d6d6] p-4 border-2 text-left" itemprop="articleBody">
                   <h3 class="text-2xl my-4">Stake</h3>
                   <div class="stake-module">
-                    <form>
-                      <div class="from">
-                        <label for="from">DOS</label>
-                        <input type="number" id="from" name="from" required min="0" value="0" class="outline-none bg-transparent pr-8 border-2 border-[hsl(0,_0%,_60%)_hsl(0,_0%,_98%)_hsl(0,_0%,_98%)_hsl(0,_0%,_60%)] block w-full leading-[1.8]" />
-                      </div>
-                      <span><button>↑↓</button></span>
-                      <div class="to">
-                        <label for="to">sDOS</label>
-                        <input type="number" id="to" name="to" required min="0" value="0" class="outline-none bg-transparent pr-8 border-2 border-[hsl(0,_0%,_60%)_hsl(0,_0%,_98%)_hsl(0,_0%,_98%)_hsl(0,_0%,_60%)] block w-full leading-[1.8]" />
-                      </div>
-
-                      <p class="my-4 text-left">Stake your DOS and gain sDOS. No impremanent loss, no loss of governance rights. Continuously compounding. all staked DOS are subject to a 10 day lock-up period!</p>
-                      <p class="my-4 text-left">sDOS automatically earns fees from the different protocal earnings.</p>
-
-                      <input type="submit" value="Stake" class="bg-[#c7c7c7] py-[0.3rem] px-4 uppercase tracking-[1px] outline-dotted outline-offset-[-5px] border-2  border-[#fafafa_hsl(0,_0%,_20%)_hsl(0,_0%,_20%)_hsl(0,_0%,_98%)] cursor-pointer" />
-                    </form>
+                    <PleaseConnect>
+                      <ContractWrite address={stakingAddress}
+                        args={[100, userAddress]}
+                        abi={
+                          [{
+                            "inputs": [
+                              {
+                                "internalType": "uint256",
+                                "name": "assets",
+                                "type": "uint256",
+                                "token": tokenAddress,
+                                "ERC20Allow": stakingAddress,
+                              },
+                              {
+                                "internalType": "address",
+                                "name": "receiver",
+                                "type": "address",
+                                "hidden": true
+                              }
+                            ],
+                            "name": "deposit",
+                            "outputs": [
+                              {
+                                "internalType": "uint256",
+                                "name": "shares",
+                                "type": "uint256"
+                              }
+                            ],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                          }]
+                        } />
+                    </PleaseConnect>
                   </div>
                 </div>
                 <div class="before:content-[''] before:table after:content-[''] after:table"></div>
@@ -274,11 +325,20 @@ export default function Home() {
                 <div class="text-[0.889rem] mb-4 pt-10 pr-4 pb-4 pl-4 min-w-[130px] bg-[#c7c7c7] relative border-2  before:content-[''] before:absolute before:top-[3px] before:left-[3px] before:z-0 before:w-[calc(100%_-_6px)] before:h-6 before:bg-[#04007a] after:border after:content-['x'] after:leading-none after:absolute after:right-1.5 after:top-1.5 after:w-[18px] after:h-[18px] after:bg-[#c7c7c7] after:text-[0.889rem] text-center items-center justify-center after:text-black">
                   <div>
                     <h3 class="mt-0 text-white absolute left-[5px] top-2 text-center z-13 pr-[1px] pl-[2px] flex m-0 items-center leading-none text-[0.833rem]">Balance</h3>
-                    <p class="my-4 text-left">MUSE 0.00000 MUSE</p>
+                    <p class="my-4 text-left">DOS <TokenBalance address={userAddress} token={tokenAddress} /></p>
                     <hr class="wp-block-separator has-alpha-channel-opacity" />
-                    <p class="my-4 text-left">sMUSE 0.00000 sMUSE</p>
+                    {userAddress}
+                    <p class="my-4 text-left">sDOS <TokenBalance address={userAddress} token={stakingAddress} /></p>
                     <p class="my-4 text-left">Approximate staking APR 22.4562%</p>
-                    <button class="bg-[#c7c7c7] py-[0.3rem] px-4 uppercase tracking-[1px] outline-dotted outline-offset-[-5px] border-2 border-[#fafafa_hsl(0,_0%,_20%)_hsl(0,_0%,_20%)_hsl(0,_0%,_98%)] cursor-pointer">Start Unstake Period</button>
+                    <ContractWrite address={stakingAddress} abi={[
+                      {
+                        "inputs": [],
+                        "name": "activateCooldown",
+                        "outputs": [],
+                        "stateMutability": "nonpayable",
+                        "type": "function"
+                      }
+                    ]} />
                   </div>
                 </div>
                 <div class="before:content-[''] before:table after:content-[''] after:table"></div>
@@ -295,3 +355,5 @@ export default function Home() {
     </>
   )
 }
+
+export default Page;
