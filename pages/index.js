@@ -37,9 +37,10 @@ import STAKINGABI from 'ABIS/Staking.json';
 const Page = (props) => {
 
   const tokenAddress = "0x90b8ff52b4dc225acf5c9a2409f92d1e062f39f3";
-  const stakingAddress = "0xc3d63a26598154bbd7cc9b6974f20a615ec2056f";
+  const stakingAddress = "0x31A1d129318a758C33Db75bfABd520A48360Cc1b";
+  const { address, isConnecting, isDisconnected } = useAccount()
 
-  const [userAddress, setUserAddress] = React.useState("");
+  const [userAddress, setUserAddress] = React.useState(address);
   const [connectedChain, setConnectedChain] = React.useState("");
 
   useEffect(() => {
@@ -273,7 +274,7 @@ const Page = (props) => {
                   <div class="stake-module">
                     <PleaseConnect>
                       <ContractWrite address={stakingAddress}
-                        args={[100, userAddress]}
+                        args={[0, userAddress]}
                         abi={
                           [{
                             "inputs": [
@@ -306,6 +307,106 @@ const Page = (props) => {
                     </PleaseConnect>
                   </div>
                 </div>
+                <div class="mt-4 bg-[#d6d6d6] p-4 border-2 text-left" itemprop="articleBody">
+                  <h3 class="text-2xl my-4">Unstake</h3>
+                  <div class="stake-module">
+                    <PleaseConnect>
+                      <ContractRead address={stakingAddress} abi={[
+                        {
+                          "inputs": [
+                            {
+                              "internalType": "address",
+                              "name": "account",
+                              "type": "address"
+                            }
+                          ],
+                          "name": "userInfo",
+                          "outputs": [
+                            {
+                              "internalType": "uint256",
+                              "name": "_startCoolDown",
+                              "type": "uint256"
+                            },
+                            {
+                              "internalType": "uint256",
+                              "name": "_endCoolDown",
+                              "type": "uint256"
+                            },
+                            {
+                              "internalType": "bool",
+                              "name": "_canWithdraw",
+                              "type": "bool"
+                            }
+                          ],
+                          "stateMutability": "view",
+                          "type": "function"
+                        }
+                      ]} args={[userAddress]}
+                        render={function (res) {
+                          if (!res[2]) {
+                            if (Math.floor(Date.now() / 1000) < parseInt(res[0])) {
+                              return <div>Cooldown activated, you can withdraw {" "}
+                                <Moment fromNow unix>
+                                  {parseInt(res[0])}
+                                </Moment></div>
+                            }
+                            return <div>
+                              <ContractWrite address={stakingAddress} abi={[
+                                {
+                                  "inputs": [],
+                                  "name": "activateCooldown",
+                                  "outputs": [],
+                                  "stateMutability": "nonpayable",
+                                  "type": "function"
+                                }
+                              ]} />
+
+                            </div>
+                            return
+                          } else {
+                            return <div> <ContractWrite address={stakingAddress}
+                              args={[0, userAddress, userAddress]}
+                              abi={
+                                [{
+                                  "inputs": [
+                                    {
+                                      "internalType": "uint256",
+                                      "name": "assets",
+                                      "type": "uint256",
+                                      "token": stakingAddress,
+                                    },
+                                    {
+                                      "internalType": "address",
+                                      "name": "receiver",
+                                      "type": "address",
+                                      "hidden": true
+                                    },
+                                    {
+                                      "internalType": "address",
+                                      "name": "receiver",
+                                      "type": "address",
+                                      "hidden": true
+                                    }
+                                  ],
+                                  "name": "redeem",
+                                  "outputs": [
+                                    {
+                                      "internalType": "uint256",
+                                      "name": "shares",
+                                      "type": "uint256"
+                                    }
+                                  ],
+                                  "stateMutability": "nonpayable",
+                                  "type": "function"
+                                }]
+                              } /></div>
+                          }
+                        }}
+                      />
+
+                    </PleaseConnect>
+                  </div>
+                </div>
                 <div class="before:content-[''] before:table after:content-[''] after:table"></div>
               </article>
             </div>
@@ -329,15 +430,7 @@ const Page = (props) => {
                     <hr class="wp-block-separator has-alpha-channel-opacity" />
                     <p class="my-4 text-left">sDOS <TokenBalance address={userAddress} token={stakingAddress} /></p>
                     <p class="my-4 text-left">Approximate staking APR 22.4562%</p>
-                    <ContractWrite address={stakingAddress} abi={[
-                      {
-                        "inputs": [],
-                        "name": "activateCooldown",
-                        "outputs": [],
-                        "stateMutability": "nonpayable",
-                        "type": "function"
-                      }
-                    ]} />
+
                   </div>
                 </div>
                 <div class="before:content-[''] before:table after:content-[''] after:table"></div>

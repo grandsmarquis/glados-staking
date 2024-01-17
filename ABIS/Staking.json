@@ -580,6 +580,35 @@
     {
       "inputs": [
         {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "userInfo",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "_startCoolDown",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_endCoolDown",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bool",
+          "name": "_canWithdraw",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
           "internalType": "uint256",
           "name": "assets",
           "type": "uint256"
