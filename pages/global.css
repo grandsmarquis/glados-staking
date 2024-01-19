@@ -1,1 +1,13 @@
 @tailwind base;
+
+.btn {
+    @apply rounded-none bg-[#c7c7c7] py-[0.3rem] px-4 uppercase tracking-[1px] outline-dotted outline-offset-[-5px] border-2 border-[#fafafa_hsl(0,_0%,_20%)_hsl(0,_0%,_20%)_hsl(0,_0%,_98%)] cursor-pointer;
+}
+
+.input {
+    @apply outline-none bg-transparent pr-8 border-2 border-[hsl(0,_0%,_60%)_hsl(0,_0%,_98%)_hsl(0,_0%,_98%)_hsl(0,_0%,_60%)] block w-full leading-[1.8];
+}
+
+.modal-box {
+    @apply rounded-none bg-[#c7c7c7] text-black;
+}

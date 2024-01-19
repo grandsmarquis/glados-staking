@@ -33,11 +33,14 @@ import PleaseConnect from 'components/render/pleaseConnect';
 import ERC20ABI from 'ABIS/ERC20.json';
 import STAKINGABI from 'ABIS/Staking.json';
 
+import { formatEther } from 'viem'
+
+
 
 const Page = (props) => {
 
   const tokenAddress = "0x90b8ff52b4dc225acf5c9a2409f92d1e062f39f3";
-  const stakingAddress = "0x31A1d129318a758C33Db75bfABd520A48360Cc1b";
+  const stakingAddress = "0x9f6F0F34fBfd0d2B508a16E83A46eBe313148a6c";
   const { address, isConnecting, isDisconnected } = useAccount()
 
   const [userAddress, setUserAddress] = React.useState(address);
@@ -72,7 +75,7 @@ const Page = (props) => {
       <Header />
 
 
-      <div class="relative overflow-x-hidden text-base font-body leading-6 bg-[#007f80] box-border" itemscope=""
+      <div class="relative h-full overflow-x-hidden text-base font-body leading-6 bg-[#007f80] box-border" itemscope=""
         itemtype="http://schema.org/WebPage">
         <div id="page">
 
@@ -284,6 +287,7 @@ const Page = (props) => {
                                 "type": "uint256",
                                 "token": tokenAddress,
                                 "ERC20Allow": stakingAddress,
+                                "name": "DOS Amount"
                               },
                               {
                                 "internalType": "address",
@@ -309,6 +313,7 @@ const Page = (props) => {
                 </div>
                 <div class="mt-4 bg-[#d6d6d6] p-4 border-2 text-left" itemprop="articleBody">
                   <h3 class="text-2xl my-4">Unstake</h3>
+                  <p>You will need to do 1 transaction to start the unstake timer below. Once the 10 day cooldown is over and you are within the 2 days, you will do 1 more transaction to claim your DOS.</p>
                   <div class="stake-module">
                     <PleaseConnect>
                       <ContractRead address={stakingAddress} abi={[
@@ -343,12 +348,13 @@ const Page = (props) => {
                         }
                       ]} args={[userAddress]}
                         render={function (res) {
+                          console.log("RESULT", res)
                           if (!res[2]) {
                             if (Math.floor(Date.now() / 1000) < parseInt(res[0])) {
-                              return <div>Cooldown activated, you can withdraw {" "}
+                              return <strong>Cooldown activated, you can withdraw {" "}
                                 <Moment fromNow unix>
                                   {parseInt(res[0])}
-                                </Moment></div>
+                                </Moment></strong>
                             }
                             return <div>
                               <ContractWrite address={stakingAddress} abi={[
@@ -414,7 +420,34 @@ const Page = (props) => {
               <aside class="sticky top-10 font-body text-[0.883rem]" itemscope="" itemtype="http://schema.org/WPSideBar">
                 <div class="text-[0.889rem] mb-4 pt-10 pr-4 pb-4 pl-4 min-w-[130px] bg-[#c7c7c7] relative border-2  before:content-[''] before:absolute before:top-[3px] before:left-[3px] before:z-0 before:w-[calc(100%_-_6px)] before:h-6 before:bg-[#04007a] after:border after:content-['x'] after:leading-none after:absolute after:right-1.5 after:top-1.5 after:w-[18px] after:h-[18px] after:bg-[#c7c7c7] after:text-[0.889rem] text-center items-center justify-center after:text-black">
                   <div>
-                    <p>1 sDOS = 1.2345 DOS</p>
+                    <ContractRead address={stakingAddress}
+                      abi={[
+                        {
+                          "inputs": [
+                            {
+                              "internalType": "uint256",
+                              "name": "assets",
+                              "type": "uint256"
+                            }
+                          ],
+                          "name": "convertToAssets",
+                          "outputs": [
+                            {
+                              "internalType": "uint256",
+                              "name": "",
+                              "type": "uint256"
+                            }
+                          ],
+                          "stateMutability": "view",
+                          "type": "function"
+                        }
+                      ]} args={[1000000000000000000]}
+                      render={function (res) {
+                        return <p>
+                          1 sDOS = {formatEther(res)} DOS
+                        </p>
+                      }}
+                    />
                   </div>
                 </div>
                 <div class="text-[0.889rem] mb-4 pt-10 pr-4 pb-4 pl-4 min-w-[130px] bg-[#c7c7c7] relative border-2  before:content-[''] before:absolute before:top-[3px] before:left-[3px] before:z-0 before:w-[calc(100%_-_6px)] before:h-6 before:bg-[#04007a] after:border after:content-['x'] after:leading-none after:absolute after:right-1.5 after:top-1.5 after:w-[18px] after:h-[18px] after:bg-[#c7c7c7] after:text-[0.889rem] text-center items-center justify-center after:text-black">
